@@ -1,9 +1,9 @@
+# config.py
 import os
 
 class Config:
     """
     مرکز فرماندهی متغیرهای محیطی (Environment Variables)
-    این کلاس پروژه را مستقل از هر پلتفرمی (Railway, Koyeb, Render, Fly.io) می‌کند.
     """
     PORT = int(os.environ.get("PORT", "8000"))
     
