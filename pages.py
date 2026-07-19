@@ -1,10 +1,10 @@
+# pages.py
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from config import config
 
 router = APIRouter()
 
-# HTML ساده برای لاگین
 LOGIN_HTML = """
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -34,9 +34,7 @@ async def login_page(request: Request, error: str = ""):
 
 @router.post("/login")
 async def login_post(request: Request, password: str = Form(...)):
-    # در اینجا برای سادگی، رمز عبور همان SECRET_KEY در نظر گرفته می‌شود
-    # می‌توانید رمز عبور اختصاصی در config.py اضافه کنید.
-    if password == config.SECRET_KEY or password == "admin": # TODO: Change fallback
+    if password == config.SECRET_KEY or password == "admin": 
         request.session["authenticated"] = True
         return RedirectResponse(url="/", status_code=303)
     return RedirectResponse(url="/login?error=رمز عبور اشتباه است", status_code=303)
@@ -51,9 +49,6 @@ async def dashboard(request: Request):
     if not request.session.get("authenticated"):
         return RedirectResponse(url="/login")
         
-    # فایل داشبورد اصلی شما که قبلا داشتید (React/HTML).
-    # به دلیل محدودیت حجم پیام، من فرض می‌کنم فایل index.html را از دیسک می‌خوانید
-    # یا سورس HTML خام خود را اینجا قرار می‌دهید.
     try:
         from pathlib import Path
         index_path = Path(config.APP_DIR) / "index.html"
