@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Request, Response, HTTPException
-from fastapi.responses import JSONResponse, PlainTextResponse
+# central.py
+from fastapi import APIRouter, Request, HTTPException
+from fastapi.responses import PlainTextResponse
 import uuid
 import asyncio
 
-from main import (
+from config import config
+from state import (
     LINKS, LINKS_LOCK, stats, hourly_traffic, connections, error_logs, activity_log,
     save_state, log_activity, now_ir
 )
-from config import config
 
 router = APIRouter()
 
@@ -97,8 +98,6 @@ async def api_connections(request: Request):
 async def api_kill_connection(conn_id: str, request: Request):
     require_auth(request)
     if conn_id in connections:
-        # کدهای مربوط به قطع اتصال وب‌سوکت / xhttp در فایل‌های خودشان مدیریت می‌شوند
-        # اینجا فقط از لیست حذف می‌کنیم تا مانیتورینگ آپدیت شود (اتصال به زودی قطع می‌شود)
         connections.pop(conn_id, None)
         log_activity("kill_connection", f"قطع دستی اتصال {conn_id}", "warning")
         return {"status": "ok"}
@@ -116,7 +115,6 @@ async def get_subscription(uid: str, request: Request):
     if not link:
         raise HTTPException(404, "Not Found")
     
-    # استفاده از دامنه استاندارد به جای هاردکد
     domain = config.PUBLIC_DOMAIN
     
     conf_vless = f"vless://{uid}@{domain}:443?encryption=none&security=tls&sni={domain}&type=ws&host={domain}&path=%2Fvless%2F{uid}#{link['label']}-WS"
