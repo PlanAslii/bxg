@@ -1,3 +1,4 @@
+# storage.py
 import json
 import os
 import secrets
@@ -9,8 +10,6 @@ logger = logging.getLogger("uvicorn.error")
 class StorageManager:
     """
     موتور ذخیره‌سازی هوشمند.
-    اگر REDIS_URL موجود باشد، داده‌ها را در ردیس (حافظه پایدار ابری) ذخیره می‌کند.
-    در غیر این صورت از فایل JSON در DATA_DIR استفاده می‌کند.
     """
     def __init__(self, data_dir: str, redis_url: str):
         self.data_dir = Path(data_dir)
@@ -78,7 +77,6 @@ class StorageManager:
         
         logger.warning("⚠️ SECRET_KEY در متغیرهای محیطی تنظیم نشده است!")
         
-        # تلاش برای بازیابی کلید قبلی
         if self.use_redis and self.redis_client:
             secret = await self.redis_client.get("rvg_secret")
             if secret: return secret
@@ -86,7 +84,6 @@ class StorageManager:
             if self.secret_file.exists():
                 return self.secret_file.read_text(encoding="utf-8").strip()
         
-        # ساخت کلید جدید
         new_secret = secrets.token_urlsafe(32)
         if self.use_redis and self.redis_client:
             await self.redis_client.set("rvg_secret", new_secret)
